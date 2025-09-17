@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registro de Participação</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <div class="card">
+      <h1>Registro de Presença</h1>
+      <p class="sub" id="sub">Confirme sua localização para liberar o formulário</p>
+
+      <div id="status" class="status">Verificando localização...</div>
+
+      <form id="myForm" class="hidden">
+        <label class="required">Nome
+          <input id="nome" name="nome" required >
+        </label>
+        <label class="required">Email
+          <input id="email" name="email" type="email" required>
+        </label>
+    
+        <label for="curso" class="required">Curso</label>
+          <select id="curso" name="curso" required>
+            <option value="" disabled selected>Selecione o curso</option>
+            <option value="Administração">Administração</option>
+            <option value="Ciências biológicas">Ciências biológicas</option>
+            <option value="Geografia">Geografia</option>
+            <option value="História">História</option>
+            <option value="Letra">Letra</option>
+            <option value="Matemática">Matemática</option>
+            <option value="Pedagogia">Pedagogia</option>
+            <option value="Serviço Social">Serviço Social</option>
+            <option value="Sistema de Informaçao">Sistema de Informaçao</option>
+          </select>
+          
+        <label for="periodo" class="required">Período</label>
+          <select id="periodo" name="periodo" required>
+            <option value="" disabled selected>Selecione o período</option>
+            <option value="2º período">2º período</option>
+            <option value="4º período">4º período</option>
+            <option value="6º período">6º período</option>
+            <option value="8º período">8º período</option>
+          </select>
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
