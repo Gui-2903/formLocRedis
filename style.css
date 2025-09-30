@@ -81,20 +81,26 @@ input {
   font-size: 0.9rem;
 }
 
-button {
+.buttonSubmit {
   padding: .8rem;
   background: #4facfe;
   color: #fff;
-  border: none;
+  border: 1px solid rgba(128, 163, 233, 0.527);
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 3s ease;
+  transition: all 0.3s ease;
 }
 
-button:hover {
+.buttonSubmit:hover {
   background: #3a8de0;
+  transform: scale(1.033);
+}
+.buttonSubmit:active {
+  background: rgba(30, 80, 180, 0.35);
+  transform: scale(0.97);
 }
 
 .hidden {
@@ -135,4 +141,32 @@ option:checked {
   background: #0365d67a;
   color: #fff;
 }
+
+.btn-reiniciar {
+  background: rgba(30, 80, 180, 0.15); /* Azul fosco translúcido */
+  color: #1e50b4ab; /* Azul principal */
+  border: 1px solid rgba(30, 80, 180, 0.527);
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(30, 80, 180, 0.1);
+}
+
+.btn-reiniciar:hover {
+  background: rgba(30, 80, 180, 0.25);
+  box-shadow: 0 4px 8px rgba(30, 80, 180, 0.2);
+  transform: scale(1.033);
+}
+
+.btn-reiniciar:active {
+  background: rgba(30, 80, 180, 0.35);
+  transform: scale(0.97);
+}
+
+
 
