@@ -6,7 +6,7 @@ const reiniciarBtn = document.getElementById('reiniciar');
 
 // --- Variáveis globais ---
 let evento;
-let eventID;
+let eventoID;
 let targetLat;
 let targetLng;
 let allowedRadius;
@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     targetLng = config.targetLng;
     allowedRadius = config.allowedRadius;
     evento = config.evento;
-    eventID = config.eventID;
+    eventoID = config.ID;
     //console.log("Configuração do evento:", config);
 
     // Inicia verificação de localização
@@ -102,23 +102,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  // Verifica se já respondeu
-  if (localStorage.getItem(`formRespondido${eventID}`) === "true") {
-    form.classList.add('hidden');
-    statusEl.textContent = `Você já enviou sua resposta ❌${eventID}`;
-    alert(`Você já enviou sua resposta para o evento ${eventID}!`);
-    reiniciarBtn.classList.remove('hidden');
+  
+
+  if (!email || !nome) {
+    alert('Nome e email obrigatórios');
     return;
   }
 
-  statusEl.textContent = 'Enviando...';
+  statusEl.textContent = 'Verificando se já respondeu...';
+
+  try {
+    const check = await fetch(`/api/has-responded?email=${encodeURIComponent(email)}&eventID=${encodeURIComponent(eventoID)}`);
+    const cj = await check.json();
+    if (check.ok && cj.responded) {
+      form.classList.add('hidden');
+      statusEl.textContent = 'Enviando...';
+      reiniciarBtn.classList.remove('hidden');
+      return;
+    }
+  } catch (err) {
+    console.warn('Não foi possível checar status (continuaremos):', err);
+    // opcional: aqui você pode impedir envio se checagem for crítica
+  }
+
 
   const data = {
     nome: document.getElementById('nome').value.trim(),
     email: document.getElementById('email').value.trim(),
     curso: document.getElementById('curso').value.trim(),
-    periodo: document.getElementById('periodo').value.trim()
+    periodo: document.getElementById('periodo').value.trim(),
+    ID : eventoID
+    
   };
+  console.log(data);
 
   try {
     const resp = await fetch('/api/submit', {
@@ -126,15 +142,17 @@ form.addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
-
     const j = await resp.json();
 
     if (resp.ok) {
-      statusEl.textContent = 'Formulário enviado com sucesso!✅';
-      localStorage.setItem(`formRespondido${eventID}`, "true");
+      statusEl.textContent = 'Formulário enviado com sucesso! ✅';
       form.reset();
-      reiniciarBtn.classList.remove('hidden');
       form.classList.add('hidden');
+      reiniciarBtn.classList.remove('hidden');
+    } else if (resp.status === 409) {
+      statusEl.textContent = 'Você já enviou sua resposta (servidor) ✅';
+      form.classList.add('hidden');
+      reiniciarBtn.classList.remove('hidden');
     } else {
       statusEl.textContent = 'Erro ao enviar: ' + (j.error || resp.status);
     }
@@ -142,6 +160,7 @@ form.addEventListener('submit', async (e) => {
     console.error(err);
     statusEl.textContent = 'Erro de comunicação com servidor.';
   }
+
 });
 
 // --- Evento click do botão reiniciar ---

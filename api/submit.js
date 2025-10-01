@@ -1,19 +1,28 @@
 // api/submit.js
+import crypto from 'crypto';
+import { redis } from '../lib/upstash.js'; // ou import { redis } from '../../lib/upstash' se usar upstash
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { nome, email, curso, periodo, lat, lng } = req.body || {};
+    const { nome, email, curso, periodo, ID } = req.body || {};
+    if (!nome || !email || !ID) return res.status(400).json({ error: 'Campos obrigatórios faltando' });
 
-    if (!nome || !email) return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    // Checa se já respondeu (redundância/segurança)
+    const emailHash = crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
+    const key = `event:${ID}_responded:${emailHash}`;
+    
+    const already = await redis.get(key);
+    if (already) return res.status(409).json({ error: 'Já respondeu' });
 
-    // PARAMS DO GOOGLE FORM — pegue estes entry.* e FORM_ID e coloque nas env vars
+    // --- Envia pro Google Forms (seu código, adaptado pra manter eventID se precisar) ---
     const FORM_ID = process.env.FORM_ID;
     const ENTRY_NOME = process.env.ENTRY_NOME;
     const ENTRY_EMAIL = process.env.ENTRY_EMAIL;
     const ENTRY_CURSO = process.env.ENTRY_CURSO;
     const ENTRY_PERIODO = process.env.ENTRY_PERIODO;
-  
+
     if (!FORM_ID || !ENTRY_NOME || !ENTRY_EMAIL) {
       return res.status(500).json({ error: 'Configuração do formulário faltando no servidor' });
     }
@@ -23,22 +32,19 @@ export default async function handler(req, res) {
     params.append(ENTRY_EMAIL, email);
     if (ENTRY_CURSO) params.append(ENTRY_CURSO, curso || '');
     if (ENTRY_PERIODO) params.append(ENTRY_PERIODO, periodo || '');
-    
+
     const url = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
-
-    // DEBUG: log (apenas local/dev)
-    console.log('Enviando para Google Forms:', url, params.toString());
-
     const r = await fetch(url, {
       method: 'POST',
       body: params.toString(),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
 
-    console.log('Google status:', r.status);
-
-    // Google normalmente responde 200 ou 302 redirect; consideramos sucesso se não for 4xx/5xx
     if (r.status >= 200 && r.status < 400) {
+      // grava no Redis marcando que este e-mail respondeu este eventID
+      await redis.set(key, '1');
+      // opcional: definir TTL (em segundos). Ex: 1 ano:
+      // await redis.expire(key, 60*60*24*365);
       return res.status(200).json({ ok: true });
     } else {
       const text = await r.text().catch(()=>null);
