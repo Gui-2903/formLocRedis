@@ -12,6 +12,7 @@ let targetLng;
 let allowedRadius;
 let lat = null;
 let lng = null;
+let fingerprint = null;
 
 // --- Função para converter graus em radianos ---
 function toRad(d) {
@@ -96,13 +97,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Erro ao buscar nome do evento:", err);
     statusEl.textContent = 'Erro ao carregar configuração do evento.';
   }
+
+  // Inicializa FingerprintJS quando o DOM estiver carregado
+  const fpPromise = window.FingerprintJS.load();
+  fpPromise.then(fp => fp.get()).then(result => {
+    fingerprint = result.visitorId;
+  });
 });
 
 // --- Evento submit do formulário ---
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
-
-  
 
   if (!email || !nome) {
     alert('Nome e email obrigatórios');
@@ -112,11 +117,11 @@ form.addEventListener('submit', async (e) => {
   statusEl.textContent = 'Verificando se já respondeu...';
 
   try {
-    const check = await fetch(`/api/has-responded?email=${encodeURIComponent(email)}&eventID=${encodeURIComponent(eventoID)}`);
+    const check = await fetch(`/api/has-responded?eventoID=${encodeURIComponent(eventoID)}&fingerprint=${encodeURIComponent(fingerprint)}`);
     const cj = await check.json();
     if (check.ok && cj.responded) {
       form.classList.add('hidden');
-      statusEl.textContent = 'Enviando...';
+      statusEl.textContent = 'Você já respondeu!';
       reiniciarBtn.classList.remove('hidden');
       return;
     }
@@ -127,15 +132,18 @@ form.addEventListener('submit', async (e) => {
 
 
   const data = {
+    evento: evento,
+    ID: eventoID,
+    fingerprint: fingerprint,
     nome: document.getElementById('nome').value.trim(),
     email: document.getElementById('email').value.trim(),
     curso: document.getElementById('curso').value.trim(),
-    periodo: document.getElementById('periodo').value.trim(),
-    ID : eventoID
+    periodo: document.getElementById('periodo').value.trim()
     
   };
-  console.log(data);
 
+  console.log(data);
+  
   try {
     const resp = await fetch('/api/submit', {
       method: 'POST',

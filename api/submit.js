@@ -1,18 +1,18 @@
 // api/submit.js
 import crypto from 'crypto';
 import { redis } from '../lib/upstash.js'; // ou import { redis } from '../../lib/upstash' se usar upstash
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { nome, email, curso, periodo, ID } = req.body || {};
-    if (!nome || !email || !ID) return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    const { ID, fingerprint, nome, email, curso, periodo, evento } = req.body || {};
+    if (!ID || !fingerprint) return res.status(400).json({ error: 'Campos obrigatórios faltando' });
 
-    // Checa se já respondeu (redundância/segurança)
-    const emailHash = crypto.createHash('sha256').update(email.toLowerCase().trim()).digest('hex');
-    const key = `event:${ID}_responded:${emailHash}`;
-    
+    // Chave baseada em fingerprint e evento
+    const key = `event:${ID}_fp:${fingerprint}`;
+    const evento_ID = evento+"_"+ID;
+
+    // Checa se já existe
     const already = await redis.get(key);
     if (already) return res.status(409).json({ error: 'Já respondeu' });
 
@@ -41,10 +41,20 @@ export default async function handler(req, res) {
     });
 
     if (r.status >= 200 && r.status < 400) {
-      // grava no Redis marcando que este e-mail respondeu este eventID
-      await redis.set(key, '1');
-      // opcional: definir TTL (em segundos). Ex: 1 ano:
-      // await redis.expire(key, 60*60*24*365);
+      // Salva JSON no Redis ✅
+      const data = {
+        evento_ID,
+        nome, 
+        email,
+        curso,
+        periodo,
+        fingerprint,
+        timestamp: Date.now(),
+      };
+      await redis.set(key, JSON.stringify(data), {
+        ex: 60 * 60 * 24 * 365, // expira em 1 ano
+      });
+
       return res.status(200).json({ ok: true });
     } else {
       const text = await r.text().catch(()=>null);
