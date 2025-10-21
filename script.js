@@ -1,3 +1,4 @@
+
 // --- Seleção de elementos DOM ---
 const form = document.getElementById('myForm');
 const statusEl = document.getElementById('status');
@@ -13,6 +14,7 @@ let allowedRadius;
 let lat = null;
 let lng = null;
 let fingerprint = null;
+let uuid = null;
 
 // --- Função para converter graus em radianos ---
 function toRad(d) {
@@ -44,6 +46,10 @@ function verificarLocalizacao() {
     pos => {
       lat = pos.coords.latitude;
       lng = pos.coords.longitude;
+
+      // Para testes
+      //lat = -20.738130518152236;
+      //lng = -42.023347210022386;
 
       const dist = haversine(lat, lng, targetLat, targetLng);
 
@@ -99,10 +105,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Inicializa FingerprintJS quando o DOM estiver carregado
+  try {
   const fpPromise = window.FingerprintJS.load();
-  fpPromise.then(fp => fp.get()).then(result => {
+  fpPromise.then(fp => fp.get()).then(result => { 
     fingerprint = result.visitorId;
   });
+  } catch (err) {
+    console.error('Erro ao inicializar FingerprintJS:', err);
+    fingerprint = null;  // Use só UUID como fallback
+  }
+
+    
+  // 1. Tente obter UUID do localStorage (fallback persistente)
+  uuid = localStorage.getItem('user_uuid');
+  console.log("UUID do localStorage:", uuid);
+
+  if (!uuid) {
+    uuid = crypto.randomUUID ? crypto.randomUUID() : uuidv4();  // UUID v4
+    uuid = uuid+"_"+eventoID;
+    console.log("Novo UUID gerado:", uuid);
+    localStorage.setItem('user_uuid', uuid);
+  }else{
+    //nao sei oq tava fazendo aq
+    
+
+  }
+
 });
 
 // --- Evento submit do formulário ---
@@ -117,13 +145,18 @@ form.addEventListener('submit', async (e) => {
   statusEl.textContent = 'Verificando se já respondeu...';
 
   try {
-    const check = await fetch(`/api/has-responded?eventoID=${encodeURIComponent(eventoID)}&fingerprint=${encodeURIComponent(fingerprint)}`);
+    const check = await fetch(`/api/has-responded?eventoID=${encodeURIComponent(eventoID)}&primaryId=${encodeURIComponent(fingerprint || uuid)}`);
     const cj = await check.json();
     if (check.ok && cj.responded) {
       form.classList.add('hidden');
       statusEl.textContent = 'Você já respondeu!';
       reiniciarBtn.classList.remove('hidden');
       return;
+    }else if (cj.responded === false){
+
+      console.log("Usuário ainda não respondeu, pode continuar. agora verificar com o UUID");
+      //verificar com o uuid
+
     }
   } catch (err) {
     console.warn('Não foi possível checar status (continuaremos):', err);
@@ -132,9 +165,11 @@ form.addEventListener('submit', async (e) => {
 
 
   const data = {
+    primaryId: fingerprint || uuid,
     evento: evento,
     ID: eventoID,
     fingerprint: fingerprint,
+    uuid: uuid,
     nome: document.getElementById('nome').value.trim(),
     email: document.getElementById('email').value.trim(),
     curso: document.getElementById('curso').value.trim(),

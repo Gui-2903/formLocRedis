@@ -5,16 +5,19 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { ID, fingerprint, nome, email, curso, periodo, evento } = req.body || {};
-    if (!ID || !fingerprint) return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    const { primaryId, ID, fingerprint, uuid, nome, email, curso, periodo, evento } = req.body || {};
+    if (!ID || !primaryId) return res.status(400).json({ error: 'Campos obrigatórios faltando' });
 
     // Chave baseada em fingerprint e evento
-    const key = `event:${ID}_fp:${fingerprint}`;
+    const key = `event:${ID}_pID:${primaryId}`;
     const evento_ID = evento+"_"+ID;
 
     // Checa se já existe
     const already = await redis.get(key);
     if (already) return res.status(409).json({ error: 'Já respondeu' });
+
+    const userData = await redis.get(uuid);
+
 
     // --- Envia pro Google Forms (seu código, adaptado pra manter eventID se precisar) ---
     const FORM_ID = process.env.FORM_ID;
@@ -49,6 +52,7 @@ export default async function handler(req, res) {
         curso,
         periodo,
         fingerprint,
+        uuid,
         timestamp: Date.now(),
       };
       await redis.set(key, JSON.stringify(data), {
@@ -65,5 +69,12 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('Erro em /api/submit:', err);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+
+  async function checkEnviou() {
+
+      const already = await redis.get(key);
+      if (already) return res.status(409).json({ error: 'Já respondeu' });
+   
   }
 }

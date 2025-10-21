@@ -7,6 +7,8 @@ export default async function handler(req, res) {
   const { primaryId, eventoID } = req.method === 'GET' ? req.query : req.body;
   if (!eventoID || !primaryId) return res.status(400).json({ error: 'eventoID e primaryId obrigatórios' });
 
+
+
   const key = `event:${eventoID}_pID:${primaryId}`;
 
   try {
