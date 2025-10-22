@@ -69,7 +69,11 @@ function verificarLocalizacao() {
       form.classList.add('hidden');
       reiniciarBtn.classList.remove('hidden');
     },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    { 
+      enableHighAccuracy: true, 
+      timeout: 15000, 
+      maximumAge: 0 
+    }
   );
 }
 
@@ -77,8 +81,30 @@ function verificarLocalizacao() {
 function resetarEstado() {
   lat = null;
   lng = null;
+  dist = null;
   location.reload();
   
+}
+
+function adicionarEventos(palestras){
+
+  const select = document.getElementById('evento');
+
+  Object.entries(palestras).forEach(([id, nome]) => {
+  const option = document.createElement("option");
+  option.value = id;     // ID do evento (ex: 333)
+  option.textContent = nome; // Nome exibido (ex: Palestra A)
+  select.appendChild(option);
+});
+
+}
+
+function saveEvent(){
+  eventoID = document.getElementById('evento').value.trim();
+  console.log("Evento selecionado:", eventoID);
+  const nomePalestra = document.getElementById('evento').options[document.getElementById('evento').selectedIndex].text;
+  console.log("nome palestra:", nomePalestra); // "palestra a" ou "palestra b"
+  evento = nomePalestra;
 }
 
 // --- Evento DOMContentLoaded: busca configuração e inicia verificação ---
@@ -94,7 +120,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     allowedRadius = config.allowedRadius;
     evento = config.evento;
     eventoID = config.ID;
-    //console.log("Configuração do evento:", config);
+    palestras = JSON.parse(config.palestras);
+
+    //adiciona eventos;
+    adicionarEventos(palestras);
 
     // Inicia verificação de localização
     verificarLocalizacao();
@@ -142,6 +171,9 @@ form.addEventListener('submit', async (e) => {
     return;
   }
 
+  //Salvando o evento escolhido
+  saveEvent();
+  
   statusEl.textContent = 'Verificando se já respondeu...';
 
   try {
@@ -166,10 +198,10 @@ form.addEventListener('submit', async (e) => {
 
   const data = {
     primaryId: fingerprint || uuid,
-    evento: evento,
-    ID: eventoID,
-    fingerprint: fingerprint,
     uuid: uuid,
+    fingerprint: fingerprint,
+    ID: eventoID,
+    evento: evento,
     nome: document.getElementById('nome').value.trim(),
     email: document.getElementById('email').value.trim(),
     curso: document.getElementById('curso').value.trim(),
