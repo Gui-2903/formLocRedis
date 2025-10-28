@@ -16,6 +16,11 @@ let lng = null;
 let fingerprint = null;
 let uuid = null;
 
+let endpoints = {
+  GET: '/api/configsRedis',
+  PUT: '/api/configsRedis'
+};
+
 // --- Função para converter graus em radianos ---
 function toRad(d) {
   return d * Math.PI / 180;
@@ -48,8 +53,8 @@ function verificarLocalizacao() {
       lng = pos.coords.longitude;
 
       // Para testes
-      //lat = -20.738130518152236;
-      //lng = -42.023347210022386;
+      lat = -20.738130518152236;
+      lng = -42.023347210022386;
 
       const dist = haversine(lat, lng, targetLat, targetLng);
 
@@ -110,17 +115,20 @@ function saveEvent(){
 // --- Evento DOMContentLoaded: busca configuração e inicia verificação ---
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const res = await fetch('/api/config');
-    if (!res.ok) throw new Error('Erro ao buscar config');
-    const config = await res.json();
+
+    const redisConfig = await fetch(endpoints.GET);
+    if (!redisConfig.ok) throw new Error('Erro ao buscar config');
+    const redisConfigData = await redisConfig.json();
+    console.log("redisConfigData:", redisConfigData);
+
 
     // Atribui valores da configuração
-    targetLat = config.targetLat;
-    targetLng = config.targetLng;
-    allowedRadius = config.allowedRadius;
-    evento = config.evento;
-    eventoID = config.ID;
-    palestras = JSON.parse(config.palestras);
+    targetLat = redisConfigData.TARGET_LAT || 0;
+    targetLng = redisConfigData.TARGET_LNG || 0;
+    allowedRadius = redisConfigData.ALLOWED_RADIUS_METERS || 0;
+    evento = redisConfigData.EVENTO || "Evento";
+    eventoID = redisConfigData.ID || 0;
+    palestras = redisConfigData.PALESTRAS || "{}";
 
     //adiciona eventos;
     adicionarEventos(palestras);
@@ -151,7 +159,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!uuid) {
     uuid = crypto.randomUUID ? crypto.randomUUID() : uuidv4();  // UUID v4
-    uuid = uuid+"_"+eventoID;
     console.log("Novo UUID gerado:", uuid);
     localStorage.setItem('user_uuid', uuid);
   }else{
@@ -198,7 +205,7 @@ form.addEventListener('submit', async (e) => {
 
   const data = {
     primaryId: fingerprint || uuid,
-    uuid: uuid,
+    uuid: uuid + "_" + eventoID,
     fingerprint: fingerprint,
     ID: eventoID,
     evento: evento,

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Configuração do Evento</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/config/config.css" />
+</head>
+<body>
+  <main>
+    <div class="card" id="card">
+      <h1>Admin — Configurações (Redis)</h1>
+      <p class="sub">Edite os valores do banco e salve. Espera-se duas rotas: <code>GET /api/config</code> e <code>PUT /api/config</code>.</p>
+
+      <div class="top-actions">
+        <button id="btnReload" class="smallBtn">Recarregar do servidor</button>
+        <button id="btnExport" class="smallBtn">Exportar JSON</button>
+        <label class="smallBtn" style="display:inline-block; cursor:pointer;">
+          Importar JSON
+          <input id="fileImport" type="file" accept=".json,application/json" style="display:none" />
+        </label>
+      </div>
+
+      <form id="adminForm">
+        <div class="grid">
+          <div>
+            <label class="required">ALLOWED_RADIUS_METERS
+              <input id="allowedRadius" name="ALLOWED_RADIUS_METERS" type="number" required />
+            </label>
+          </div>
+
+          <div>
+            <label class="required">EVENTO
+              <input id="evento" name="EVENTO" type="text" required />
+            </label>
+          </div>
+
+          <div>
+            <label class="required">TARGET_LAT
+              <input id="targetLat" name="TARGET_LAT" type="number" step="any" required />
+            </label>
+          </div>
+
+          <div>
+            <label class="required">TARGET_LNG
+              <input id="targetLng" name="TARGET_LNG" type="number" step="any" required />
+            </label>
+          </div>
+
+          <div class="full">
+            <label class="required">PALESTRAS
+              <div class="muted">Gerencie pares ID → Nome. IDs devem ser únicos (string ou number).<button id="btnAtualizarTudo" type="button" class="smallBtn">ATUALIZAR TUDO</button></div>
+              <div id="palestrasContainer" class="palestras-list"></div>
+
+              <div style="margin-top:.6rem; display:flex; gap:.5rem;">
+                <input id="newPalestraId" placeholder="ID da palestra (ex: 2304)" />
+                <input id="newPalestraName" placeholder="Nome da palestra (ex: palestra ee)" />
+                <button id="btnAddPalestra" type="button" class="smallBtn">Adicionar</button>
+              </div>
+            </label>
+          </div>
+
+          <div class="full">
+            <div style="display:flex; gap:.5rem; align-items:center; margin-top:.5rem;">
+              <button id="btnSave" class="buttonSubmit" type="submit">Salvar no servidor</button>
+              <button id="btnReset" type="button" class="smallBtn">Reset UI</button>
+              <div id="statusMsg" style="margin-left:auto"></div>
+            </div>
+          </div>
+
+          <div class="full">
+            <label>Preview do JSON</label>
+            <pre id="jsonPreview" class="json-preview">Carregando...</pre>
+          </div>
+        </div>
+      </form>
+
+      <hr class="divider" />
+
+      <div class="muted">Observações do backend:</div>
+      <ul class="muted">
+        <li>GET /api/config retorna o objeto JSON atual.</li>
+        <li>PUT /api/config recebe o objeto JSON completo no corpo e persiste no Redis.</li>
+      </ul>
+    </div>
+  </main>
+
+  <script src="/config/config.js"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Administração — Configuração</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="admin-style.css" />
+</head>
+<body>
+  <main>
+    <!-- LOGIN -->
+    <section id="loginSection" class="card">
+      <h1>Acesso Administrativo</h1>
+      <p class="sub">Faça login para gerenciar as configurações.</p>
+
+      <div id="loginStatus" class="status error hidden"></div>
+
+      <form method="POST" id="loginForm">
+        <label for="usuario" class="required">Usuário
+          <input id="usuario" name="usuario" required placeholder="usuário">
+        </label>
+        <label for="senha" class="required">Senha
+          <input id="senha" name="senha" type="password" required placeholder="••••••••">
+        </label>
+        <button type="submit" class="buttonSubmit">Entrar</button>
+        <p id="mensagem-erro" style="color:red"></p>
+      </form>
+    </section>
+
+
+  </main>
+
+  <script src="/adm/admin.js"></script>
+ 
+</body>
+</html>

@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const already = await redis.get(key);
     if (already) return res.status(409).json({ error: 'Já respondeu' });
 
-    const userData = await redis.get(uuid);
+    //const userData = await redis.get(uuid);
 
 
     // --- Envia pro Google Forms (seu código, adaptado pra manter eventID se precisar) ---
