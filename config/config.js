@@ -127,6 +127,7 @@ function renderUIFromCurrent() {
   eventoEl.value = current.EVENTO ?? '';
   targetLatEl.value = current.TARGET_LAT ?? '';
   targetLngEl.value = current.TARGET_LNG ?? '';
+  toggleMonitorEl.checked = String(current.LOCALIZACAO) === "true";
   renderPalestras(current.PALESTRAS || {});
   updatePreview();
 }

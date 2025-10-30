@@ -112,25 +112,42 @@ input:focus {
   background: #0069d9;
 }
 
-.danger {
-  
-  background: #ffeef0;
-  border-color: #ffccd5;
-  color: #b30b1e;
-}
 
 #statusMsg{
-
   font-weight: 600;
-  margin-top: 0.5rem;
+  /* margin-top: 0.5rem; */ /* Removido para alinhar melhor com os botões */
+  
+  /* --- NOVAS REGRAS PARA ESTABILIZAR A ALTURA --- */
+  
+  /* 1. Define uma altura mínima estável (suficiente para ~2 linhas) */
+  min-height: 2.8em; 
+  
+  /* 2. Adiciona um preenchimento para a mensagem não colar nas bordas */
+  /*padding: 0.5rem 2.8rem;
+  
+  /* 3. Garante que o padding não "aumente" a altura total */
+  box-sizing: border-box;
+
+  /* 4. Truque para centralizar o texto verticalmente se houver só 1 linha */
+  display: flex;
+  align-items: center;
+  
+  /* 5. Garante que ele possa crescer se a mensagem for muito longa (ex: mobile) */
+  flex: 1; 
 }
 
 
 .success {
-  
+  padding: 0.5rem 2.999rem;
   background: #e6ffef;
   border-color: #bff0cf;
   color: #0a6b2f;
+}
+.danger {
+  padding: 0.5rem 5.1099rem;
+  background: #ffeef0;
+  border-color: #ffccd5;
+  color: #b30b1e;
 }
 
 /* ======== PALESTRAS ======== */
