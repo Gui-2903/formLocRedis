@@ -209,7 +209,7 @@ btnAddPalestra.addEventListener('click', () => {
 });
 
 // salva no servidor
-document.getElementById('adminForm').addEventListener('submit', async (ev) => {
+document.getElementById('btnSave').addEventListener('click', async (ev) => {
   ev.preventDefault();
   const allowedRadius = Number(allowedRadiusEl.value);
   const evento = eventoEl.value.trim();

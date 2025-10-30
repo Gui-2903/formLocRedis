@@ -73,7 +73,7 @@ input:focus {
 /* ======== BOTÕES ======== */
 .smallBtn,
 .atualizarBtn,
-.buttonSubmit {
+.button{
   border: none;
   border-radius: 10px;
   padding: 0.8rem 1rem;
@@ -103,12 +103,12 @@ input:focus {
   background: #d0e7ff;
 }
 
-.buttonSubmit {
+.button {
   background: #007bff;
   color: white;
 }
 
-.buttonSubmit:hover {
+.button:hover {
   background: #0069d9;
 }
 
