@@ -25,6 +25,7 @@ export default async function handler(req, res) {
     const ENTRY_EMAIL = process.env.ENTRY_EMAIL;
     const ENTRY_CURSO = process.env.ENTRY_CURSO;
     const ENTRY_PERIODO = process.env.ENTRY_PERIODO;
+    const ENTRY_EVENTO = process.env.ENTRY_EVENTO;
 
     if (!FORM_ID || !ENTRY_NOME || !ENTRY_EMAIL) {
       return res.status(500).json({ error: 'Configuração do formulário faltando no servidor' });
@@ -35,6 +36,7 @@ export default async function handler(req, res) {
     params.append(ENTRY_EMAIL, email);
     if (ENTRY_CURSO) params.append(ENTRY_CURSO, curso || '');
     if (ENTRY_PERIODO) params.append(ENTRY_PERIODO, periodo || '');
+    if (evento) params.append(ENTRY_EVENTO, evento || '');
 
     const url = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
     const r = await fetch(url, {

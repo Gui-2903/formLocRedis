@@ -107,6 +107,7 @@ async function loadFromServer() {
     setStatus('Não foi possível carregar do servidor → usando fallback local.', 'danger');
   }
   renderUIFromCurrent();
+  comparePreviewWithRedis();
 }
 
 function setStatus(text, type) {
@@ -308,6 +309,8 @@ function highlightChangedFields(differences) {
   // Remove destaques antigos
   document.querySelectorAll('.field-changed').forEach(el => el.classList.remove('field-changed'));
 
+  if (!differences || differences.length === 0) return;
+
   differences.forEach(diff => {
     const path = diff.path.replace(/^\$\.?/, '').replace(/^0\./, '');
 
@@ -327,11 +330,11 @@ function highlightChangedFields(differences) {
       if (palestraDiv) {
         palestraDiv.classList.add('field-changed');
       } else {
-        console.warn('Não foi encontrada div para palestra ID:', palestraId);
+        //console.warn('Não foi encontrada div para palestra ID:', palestraId);
       }
     }
   }
-
+  updatePreview();
   });
 }
 // Função para verificar alterações no Redis
@@ -350,11 +353,13 @@ async function comparePreviewWithRedis() {
     const redisClean = Array.isArray(redisData) ? redisData[0] : redisData;
 
     // Compara
-    const differences = diffObjects(localData, redisClean);
+    const differences = diffObjects(redisClean,localData);
     console.log("Diferenças entre preview e Redis:", differences);
 
     if (differences.length === 0) {
       setStatus('✅ Nenhuma diferença entre o que está na tela e o Redis.', 'success');
+      highlightChangedFields(false); // Remove destaques
+      
     } else {
       setStatus(`⚠️ ${differences.length} diferenças detectadas em relação ao Redis.`, 'danger');
       highlightChangedFields(differences);
@@ -374,20 +379,21 @@ const debounce = (func, delay) => {
 };
 const debouncedCompare = debounce(comparePreviewWithRedis, 500);
 function configurarMonitoramento(elementoAlvo) {
-  
-  //elementoAlvo.addEventListener('click', debouncedCompare);
-  //elementoAlvo.addEventListener('keyup', debouncedCompare);
-  elementoAlvo.addEventListener('change', debouncedCompare);
-  elementoAlvo.addEventListener('input', debouncedCompare);
+  if(elementoAlvo === false){
+    console.log("Monitoramento desativado");
+    comparePreviewWithRedis();
+  }else{
+    
+    elementoAlvo.addEventListener('click', debouncedCompare);
+    elementoAlvo.addEventListener('keyup', debouncedCompare);
+    elementoAlvo.addEventListener('change', debouncedCompare);
+    elementoAlvo.addEventListener('input', debouncedCompare);
 
+  }
 }
+
 // Chame a função para configurar o monitoramento em todo o corpo do documento
 configurarMonitoramento(document.body);
-// Intervalo de verificação a cada 15 segundos
-//setInterval(comparePreviewWithRedis, 5000);
-
-
-
 
 btnReload.addEventListener('click', loadFromServer);
 btnExport.addEventListener('click', () => {

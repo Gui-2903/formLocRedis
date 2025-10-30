@@ -11,7 +11,7 @@
   <main>
     <div class="card" id="card">
       <h1>Admin — Configurações (Redis)</h1>
-      <p class="sub">Edite os valores do banco e salve. Espera-se duas rotas: <code>GET /api/config</code> e <code>PUT /api/config</code>.</p>
+      <p class="sub">Edite os valores do banco e salve.</p>
 
       <div class="top-actions">
         <button id="btnReload" class="smallBtn">Recarregar do servidor</button>
@@ -25,7 +25,7 @@
       <form id="adminForm">
         <div class="grid">
           <div>
-            <label class="required">ALLOWED_RADIUS_METERS
+            <label class="required">RAIO PERMITIDO(METROS)
               <input id="allowedRadius" name="ALLOWED_RADIUS_METERS" type="number" required />
             </label>
           </div>
@@ -49,23 +49,26 @@
           </div>
 
           <div class="full">
-            <label class="required">PALESTRAS
-              <div class="muted">Gerencie pares ID → Nome. IDs devem ser únicos (string ou number).<button id="btnAtualizarTudo" type="button" class="smallBtn">ATUALIZAR TUDO</button></div>
-              <div id="palestrasContainer" class="palestras-list"></div>
+            <label class="required">PALESTRAS</label>
+            
+            <div class="muted">Gerencie pares ID → Nome. IDs devem ser únicos (string ou number).</div>
+            <button id="btnAtualizarTudo" type="button" class="atualizarBtn">ATUALIZAR TUDO</button>
+            
+            <div id="palestrasContainer" class="palestras-list"></div>
 
-              <div style="margin-top:.6rem; display:flex; gap:.5rem;">
-                <input id="newPalestraId" placeholder="ID da palestra (ex: 2304)" />
-                <input id="newPalestraName" placeholder="Nome da palestra (ex: palestra ee)" />
-                <button id="btnAddPalestra" type="button" class="smallBtn">Adicionar</button>
-              </div>
-            </label>
+            <p style="margin-top:4rem;">Adicionar nova palestra</p>
+            <div style="margin-top:0rem; display:flex; gap:.5rem;">
+              <input id="newPalestraId" placeholder="ID da palestra (ex: 2304)" />
+              <input id="newPalestraName" placeholder="Nome da palestra (ex: palestra ee)" />
+              <button id="btnAddPalestra" type="button" class="smallBtn">Adicionar</button>
+            </div>
           </div>
 
           <div class="full">
-            <div style="display:flex; gap:.5rem; align-items:center; margin-top:.5rem;">
+            <div style="display:flex; gap:.5rem; align-items:center; margin-top:2.5rem;">
               <button id="btnSave" class="buttonSubmit" type="submit">Salvar no servidor</button>
               <button id="btnReset" type="button" class="smallBtn">Reset UI</button>
-              <div id="statusMsg" style="margin-left:auto"></div>
+              <div id="statusMsg" class="situationMsg" ></div>
             </div>
           </div>
 
