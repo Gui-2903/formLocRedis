@@ -1,5 +1,35 @@
+main {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
 .card {
-  max-width: 820px;
+  background: #fff;
+  width: 100%;
+  max-width: 900px;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 0.3rem;
+}
+p{
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  color: #374363;
+  letter-spacing: 0.3px;
+  font-weight: 700;
+}
+
+.sub {
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 1.2rem;
 }
 
 .grid {
@@ -13,17 +43,73 @@
   grid-column: 1 / -1;
 }
 
-.smallBtn {
-  padding: .5rem .6rem;
-  border-radius: 8px;
-  border: 1px solid rgba(0,0,0,0.08);
-  background: #f7f9ff;
-  cursor: pointer;
+label {
+  display: flex;
+  flex-direction: column;
   font-weight: 600;
+  gap: 0.3rem;
+}
+.AddPalestra{
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  gap: 0.3rem;
+}
+
+input {
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+  outline: none;
+}
+
+/* ======== BOTÕES ======== */
+.smallBtn,
+.atualizarBtn,
+.buttonSubmit {
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.smallBtn {
+  background: #eef3ff;
+  color: #0a3d91;
 }
 
 .smallBtn:hover {
-  background: #eef4ff;
+  background: #dbe4ff;
+}
+
+.atualizarBtn {
+  background: #e6f3ff;
+  color: #0353a4;
+  width: fit-content;
+  margin-left: auto;
+  margin-bottom: 1rem;
+}
+
+.atualizarBtn:hover {
+  background: #d0e7ff;
+}
+
+.buttonSubmit {
+  background: #007bff;
+  color: white;
+}
+
+.buttonSubmit:hover {
+  background: #0069d9;
 }
 
 .danger {
@@ -38,60 +124,61 @@
   color: #0a6b2f;
 }
 
+/* ======== PALESTRAS ======== */
 .palestras-list {
   display: flex;
   flex-direction: column;
-  gap: .5rem;
-  margin-top: .5rem;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
 }
 
 .palestra-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.6rem;
   border-radius: 10px;
+  background: #f9faff;
+  border: 1px solid #dbe2f0;
   transition: all 0.3s ease;
 }
 
 .palestra-item input {
   flex: 1;
-  height: 32px;
+  min-width: 120px;
+  height: 36px;
   border-radius: 8px;
   padding: 4px 8px;
-  border: 1px solid #ccc;
-  transition: border-color 0.3s ease, background 0.3s ease;
 }
+
 .palestra-item button {
-  height: 32px;
+  height: 36px;
   border-radius: 8px;
   padding: 0 10px;
 }
+
+.field-changed {
+  background: rgba(0, 183, 255, 0.1);
+  box-shadow: 0 0 6px 2px rgba(38, 81, 94, 0.349);
+  border: 1px solid rgba(161, 182, 189, 0.4);
+  border-radius: 10px;
+}
+
+/* ======== DEMAIS ELEMENTOS ======== */
+.muted {
+  color: #666;
+  font-size: 0.9rem;
+}
+
 pre.json-preview {
   background: #f8f9fc;
   padding: 1rem;
   border-radius: 8px;
-  max-height: 220px;
+  max-height: 240px;
   overflow: auto;
   border: 1px solid #e6eefc;
-}
-
-.row {
-  display: flex;
-  gap: .5rem;
-  align-items: center;
-}
-
-.muted {
-  color: #666;
-  font-size: .9rem;
-}
-
-.top-actions {
-  display: flex;
-  gap: .5rem;
-  justify-content: flex-end;
-  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
 .divider {
@@ -99,17 +186,84 @@ pre.json-preview {
   border: none;
   border-top: 1px solid #eef4ff;
 }
-.field-changed {
-  
-  background: rgba(0, 183, 255, 0.1);
-  box-shadow: 0 0 6px 2px rgba(38, 81, 94, 0.349);
-  border: 1px solid rgba(161, 182, 189, 0.4);
-  border-radius: 10px;
-  transition: all 0.3s ease;
+
+.top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-bottom: 1.2rem;
 }
 
-.palestra-item.field-changed {
-  background: rgba(0, 183, 255, 0.1);
-  box-shadow: 0 0 6px 2px rgba(38, 81, 94, 0.349);
-  border: 1px solid rgba(161, 182, 189, 0.4);
+#statusMsg {
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* ======== RESPONSIVO (CELULAR) ======== */
+@media (max-width: 768px) {
+  main {
+    padding: 0;
+  }
+
+  .card {
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100%;
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .top-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .smallBtn,
+  .atualizarBtn,
+  .buttonSubmit {
+    width: 100%;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+
+  .palestra-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .palestra-item input {
+    width: 100%;
+    max-width: none;
+    height: 42px;
+  }
+
+  .palestra-item button {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  pre.json-preview {
+    max-height: none;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  input {
+    font-size: 1rem;
+    min-height: 42px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  .muted {
+    font-size: 0.95rem;
+  }
 }
