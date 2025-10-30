@@ -1,5 +1,4 @@
 // api/submit.js
-import crypto from 'crypto';
 import { redis } from '../lib/upstash.js'; // ou import { redis } from '../../lib/upstash' se usar upstash
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
