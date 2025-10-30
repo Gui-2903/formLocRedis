@@ -11,6 +11,7 @@ let eventoID;
 let targetLat;
 let targetLng;
 let allowedRadius;
+let localizacao;
 let lat = null;
 let lng = null;
 let fingerprint = null;
@@ -53,8 +54,10 @@ function verificarLocalizacao() {
       lng = pos.coords.longitude;
 
       // Para testes
-      lat = -20.738130518152236;
-      lng = -42.023347210022386;
+      if(localizacao === "false" || localizacao === false){
+        lat = -20.738130518152236;
+        lng = -42.023347210022386;
+      }
 
       const dist = haversine(lat, lng, targetLat, targetLng);
 
@@ -129,6 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     evento = redisConfigData.EVENTO || "Evento";
     eventoID = redisConfigData.ID || 0;
     palestras = redisConfigData.PALESTRAS || "{}";
+    localizacao = redisConfigData.LOCALIZACAO || "{}";
 
     //adiciona eventos;
     adicionarEventos(palestras);

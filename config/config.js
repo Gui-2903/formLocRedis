@@ -24,6 +24,7 @@ const btnExport = document.getElementById('btnExport');
 const fileImport = document.getElementById('fileImport');
 const btnReset = document.getElementById('btnReset');
 const btnAtualizarTudo = document.getElementById('btnAtualizarTudo');
+const toggleMonitorEl = document.getElementById('toggleMonitor');
 
 let current = null; // objeto corrente
 
@@ -221,6 +222,7 @@ document.getElementById('adminForm').addEventListener('submit', async (ev) => {
   const payload = {
     ALLOWED_RADIUS_METERS: allowedRadius,
     EVENTO: evento,
+    LOCALIZACAO: current.LOCALIZACAO || "---",
     PALESTRAS: current.PALESTRAS || {},
     TARGET_LAT: lat,
     TARGET_LNG: lng
@@ -251,10 +253,11 @@ document.getElementById('adminForm').addEventListener('submit', async (ev) => {
 function updatePreview() {
   const previewObj = {
     ALLOWED_RADIUS_METERS: Number(allowedRadiusEl.value || current?.ALLOWED_RADIUS_METERS || 0),
-    EVENTO: eventoEl.value || current?.EVENTO || '',
-    PALESTRAS: current?.PALESTRAS || {},
     TARGET_LAT: Number(targetLatEl.value || current?.TARGET_LAT || 0),
-    TARGET_LNG: Number(targetLngEl.value || current?.TARGET_LNG || 0)
+    TARGET_LNG: Number(targetLngEl.value || current?.TARGET_LNG || 0),
+    LOCALIZACAO: current.LOCALIZACAO || '',
+    EVENTO: eventoEl.value || current?.EVENTO || '',
+    PALESTRAS: current?.PALESTRAS || {}
   };
   jsonPreview.textContent = JSON.stringify(previewObj, null, 2);
 }
@@ -470,5 +473,21 @@ fileImport.addEventListener('change', (e) => {
   e.target.value = '';
 });
 btnReset.addEventListener('click', () => {resetarEstado();});
+
+toggleMonitorEl.addEventListener('change', () => {
+
+  if (toggleMonitorEl.checked) {
+    console.log("O monitoramento está ATIVADO.",current.LOCALIZACAO);
+    current.LOCALIZACAO = "true";
+    renderUIFromCurrent()
+    
+  } else {
+    
+    console.log("O monitoramento está DESATIVADO.",current.LOCALIZACAO);
+    current.LOCALIZACAO = "false";
+    renderUIFromCurrent()
+  }
+
+  });
 
 loadFromServer();

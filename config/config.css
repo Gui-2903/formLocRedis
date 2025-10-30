@@ -204,6 +204,90 @@ pre.json-preview {
   margin-bottom: 1.2rem;
 }
 
+/* ======== ESTILOS DO NOVO TOGGLE SWITCH ======== */
+
+/* Contêiner para alinhar o rótulo e o interruptor */
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto; /* Alinha à direita dentro do top-actions */
+  padding: 0.5rem;
+}
+
+.toggle-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #374363;
+  /* Reset de estilos de 'label' anterior */
+  flex-direction: row; 
+  gap: 0.5rem;
+}
+
+/* O contêiner principal do interruptor */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px; /* Largura do interruptor */
+  height: 28px; /* Altura do interruptor */
+  /* Reset de estilos de 'label' anterior */
+  flex-direction: row;
+  gap: 0;
+}
+
+/* Esconde o checkbox real */
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* O 'trilho' do interruptor */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+/* O 'botão' deslizante */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px; /* Tamanho do botão */
+  width: 20px;  /* Tamanho do botão */
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+/* Cor e movimento quando ATIVADO (checked) */
+input:checked + .slider {
+  background-color: #007bff; /* Cor azul (mesma do botão Salvar) */
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(22px);
+  -ms-transform: translateX(22px);
+  transform: translateX(22px); /* Distância do movimento */
+}
+
+/* Formato arredondado */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 /* ======== RESPONSIVO (CELULAR) ======== */
 @media (max-width: 768px) {
   main {

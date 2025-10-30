@@ -16,10 +16,17 @@
       <div class="top-actions">
         <button id="btnReload" class="smallBtn">Recarregar do servidor</button>
         <button id="btnExport" class="smallBtn">Exportar JSON</button>
-        <label class="smallBtn" style="display:inline-block; cursor:pointer;">
+        <label class="smallBtn">
           Importar JSON
           <input id="fileImport" type="file" accept=".json,application/json" style="display:none" />
         </label>
+        <div class="toggle-container">
+          <label for="toggleMonitor" class="toggle-label">localização:</label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggleMonitor" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
       </div>
 
       <form id="adminForm">
