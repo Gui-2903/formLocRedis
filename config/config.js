@@ -96,15 +96,17 @@ async function loadFromServer() {
     const redisConfig = await fetch(endpoints.GET);
     if (!redisConfig.ok) throw new Error('Erro ao buscar config');
     const redisConfigData = await redisConfig.json();
-    console.log("redisConfigData:", redisConfigData);
+    //console.log("redisConfigData:", redisConfigData);
 
-    fallback = redisConfigData || {};
-    console.log("Fallback de configuração:", fallback);
-    setStatus('Carregado do servidor.', 'success');
-    current = null;
+    current = redisConfigData || {};
+    //console.log("Fallback de configuração:", current);
+    setStatus('Carregado do servidor.', 'success'); 
+    //fallback = current;
+    fallback = JSON.parse(JSON.stringify(current));
+    
   } catch (err) {
     console.warn('Erro ao carregar do servidor, usando fallback:', err);
-    current = fallback;
+    current = {};
     setStatus('Não foi possível carregar do servidor → usando fallback local.', 'danger');
   }
   renderUIFromCurrent();
@@ -240,7 +242,10 @@ document.getElementById('btnSave').addEventListener('click', async (ev) => {
     const data = await res.json().catch(() => null);
     setStatus('Salvo com sucesso.', 'success');
     current = data || payload;
+    fallback = JSON.parse(JSON.stringify(current));
     renderUIFromCurrent();
+    comparePreviewWithRedis();
+
   } catch (err) {
     console.error(err);
     setStatus('Erro ao salvar — ver console.', 'danger');
@@ -349,16 +354,17 @@ async function comparePreviewWithRedis() {
     const localData = JSON.parse(localPreviewText);
 
     // Busca o JSON atual do Redis
-    const res = await fetch(endpoints.GET);
-    if (!res.ok) throw new Error('Erro ao buscar config do Redis');
-    const redisData = await res.json();
+   // const res = await fetch(endpoints.GET);
+    //if (!res.ok) throw new Error('Erro ao buscar config do Redis');
+    //const redisData = await res.json();
 
     // Remove camadas extras ($ ou [0]) se existirem
-    const redisClean = Array.isArray(redisData) ? redisData[0] : redisData;
+    //const redisClean = Array.isArray(redisData) ? redisData[0] : redisData;
 
     // Compara
-    const differences = diffObjects(redisClean,localData);
-    console.log("Diferenças entre preview e Redis:", differences);
+    console.log("Comparando 'fallback' (original):", fallback, "com 'localData' (editado):", localData);
+    const differences = diffObjects(fallback, localData); 
+    console.log("Diferenças entre preview e Original:", differences);
 
     if (differences.length === 0) {
       setStatus('✅ Nenhuma diferença entre o que está na tela e o Redis.', 'success');
@@ -480,13 +486,14 @@ toggleMonitorEl.addEventListener('change', () => {
   if (toggleMonitorEl.checked) {
     console.log("O monitoramento está ATIVADO.",current.LOCALIZACAO);
     current.LOCALIZACAO = "true";
-    renderUIFromCurrent()
-    
+    //renderUIFromCurrent()
+    updatePreview();
   } else {
     
     console.log("O monitoramento está DESATIVADO.",current.LOCALIZACAO);
     current.LOCALIZACAO = "false";
-    renderUIFromCurrent()
+    //renderUIFromCurrent()
+    updatePreview();
   }
 
   });

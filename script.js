@@ -1,11 +1,14 @@
+// =========================================================
+//  SCRIPT PRINCIPAL - Sistema de Presença / Verificação Local
+// =========================================================
 
-// --- Seleção de elementos DOM ---
+// === Seleção de elementos DOM ===
 const form = document.getElementById('myForm');
 const statusEl = document.getElementById('status');
 const sub = document.getElementById('sub');
 const reiniciarBtn = document.getElementById('reiniciar');
 
-// --- Variáveis globais ---
+// === Variáveis globais ===
 let evento;
 let eventoID;
 let targetLat;
@@ -17,28 +20,37 @@ let lng = null;
 let fingerprint = null;
 let uuid = null;
 
-let endpoints = {
+// === Endpoints ===
+const endpoints = {
   GET: '/api/configsRedis',
   PUT: '/api/configsRedis'
 };
 
-// --- Função para converter graus em radianos ---
-function toRad(d) {
-  return d * Math.PI / 180;
+// =========================================================
+//  FUNÇÕES UTILITÁRIAS
+// =========================================================
+
+// Converte graus em radianos
+function toRad(deg) {
+  return deg * Math.PI / 180;
 }
 
-// --- Função para calcular distância entre dois pontos geográficos (Haversine) ---
+// Calcula a distância entre dois pontos geográficos (Haversine)
 function haversine(aLat, aLon, bLat, bLon) {
   const R = 6371000; // Raio da Terra em metros
   const dLat = toRad(bLat - aLat);
   const dLon = toRad(bLon - aLon);
   const a = Math.sin(dLat / 2) ** 2 +
-            Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) *
-            Math.sin(dLon / 2) ** 2;
+    Math.cos(toRad(aLat)) * Math.cos(toRad(bLat)) *
+    Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// --- Função para verificar localização do usuário ---
+// =========================================================
+//  GEOLOCALIZAÇÃO E CONTROLE DE ACESSO
+// =========================================================
+
+// Verifica localização atual do usuário e compara com o ponto alvo
 function verificarLocalizacao() {
   if (!navigator.geolocation) {
     statusEl.textContent = 'Seu navegador não suporta geolocalização.';
@@ -53,8 +65,8 @@ function verificarLocalizacao() {
       lat = pos.coords.latitude;
       lng = pos.coords.longitude;
 
-      // Para testes
-      if(localizacao === "false" || localizacao === false){
+      // Simulação para testes (configurada via Redis)
+      if (localizacao === "false" || localizacao === false) {
         lat = -20.738130518152236;
         lng = -42.023347210022386;
       }
@@ -77,55 +89,52 @@ function verificarLocalizacao() {
       form.classList.add('hidden');
       reiniciarBtn.classList.remove('hidden');
     },
-    { 
-      enableHighAccuracy: true, 
-      timeout: 15000, 
-      maximumAge: 0 
-    }
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
   );
 }
 
-// --- Função para resetar estado da página antes de nova verificação ---
+// Reseta estado e recarrega a página
 function resetarEstado() {
   lat = null;
   lng = null;
-  dist = null;
   location.reload();
-  
 }
 
-function adicionarEventos(palestras){
+// =========================================================
+//  CONTROLE DE EVENTOS / PALESTRAS
+// =========================================================
 
+// Preenche o <select> com as palestras recebidas do servidor
+function adicionarEventos(palestras) {
   const select = document.getElementById('evento');
-
   Object.entries(palestras).forEach(([id, nome]) => {
-  const option = document.createElement("option");
-  option.value = id;     // ID do evento (ex: 333)
-  option.textContent = nome; // Nome exibido (ex: Palestra A)
-  select.appendChild(option);
-});
-
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = nome;
+    select.appendChild(option);
+  });
 }
 
-function saveEvent(){
-  eventoID = document.getElementById('evento').value.trim();
-  console.log("Evento selecionado:", eventoID);
-  const nomePalestra = document.getElementById('evento').options[document.getElementById('evento').selectedIndex].text;
-  console.log("nome palestra:", nomePalestra); // "palestra a" ou "palestra b"
-  evento = nomePalestra;
+// Armazena o evento selecionado
+function saveEvent() {
+  const select = document.getElementById('evento');
+  eventoID = select.value.trim();
+  evento = select.options[select.selectedIndex].text;
 }
 
-// --- Evento DOMContentLoaded: busca configuração e inicia verificação ---
+// =========================================================
+//  COMUNICAÇÃO COM SERVIDOR E INICIALIZAÇÃO
+// =========================================================
+
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-
+    // Busca configuração no Redis
     const redisConfig = await fetch(endpoints.GET);
-    if (!redisConfig.ok) throw new Error('Erro ao buscar config');
+    if (!redisConfig.ok) throw new Error('Erro ao buscar configuração');
+
     const redisConfigData = await redisConfig.json();
-    console.log("redisConfigData:", redisConfigData);
 
-
-    // Atribui valores da configuração
+    // Atribui valores de configuração
     targetLat = redisConfigData.TARGET_LAT || 0;
     targetLng = redisConfigData.TARGET_LNG || 0;
     allowedRadius = redisConfigData.ALLOWED_RADIUS_METERS || 0;
@@ -134,7 +143,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     palestras = redisConfigData.PALESTRAS || "{}";
     localizacao = redisConfigData.LOCALIZACAO || "{}";
 
-    //adiciona eventos;
+    // Preenche o select de eventos
     adicionarEventos(palestras);
 
     // Inicia verificação de localização
@@ -145,89 +154,82 @@ document.addEventListener("DOMContentLoaded", async () => {
     statusEl.textContent = 'Erro ao carregar configuração do evento.';
   }
 
-  // Inicializa FingerprintJS quando o DOM estiver carregado
+  // Inicializa FingerprintJS (identificação do usuário)
   try {
-  const fpPromise = window.FingerprintJS.load();
-  fpPromise.then(fp => fp.get()).then(result => { 
-    fingerprint = result.visitorId;
-  });
+    const fpPromise = window.FingerprintJS.load();
+    fpPromise.then(fp => fp.get()).then(result => {
+      fingerprint = result.visitorId;
+    });
   } catch (err) {
     console.error('Erro ao inicializar FingerprintJS:', err);
-    fingerprint = null;  // Use só UUID como fallback
+    fingerprint = null; // fallback: usa apenas UUID
   }
 
-    
-  // 1. Tente obter UUID do localStorage (fallback persistente)
+  // Recupera ou cria UUID persistente
   uuid = localStorage.getItem('user_uuid');
-  console.log("UUID do localStorage:", uuid);
-
   if (!uuid) {
-    uuid = crypto.randomUUID ? crypto.randomUUID() : uuidv4();  // UUID v4
-    console.log("Novo UUID gerado:", uuid);
+    uuid = crypto.randomUUID ? crypto.randomUUID() : uuidv4();
     localStorage.setItem('user_uuid', uuid);
-  }else{
-    //nao sei oq tava fazendo aq
-    
-
   }
-
 });
 
-// --- Evento submit do formulário ---
+// =========================================================
+//  ENVIO DO FORMULÁRIO
+// =========================================================
+
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  const nome = document.getElementById('nome').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const curso = document.getElementById('curso').value.trim();
+  const periodo = document.getElementById('periodo').value.trim();
 
   if (!email || !nome) {
     alert('Nome e email obrigatórios');
     return;
   }
 
-  //Salvando o evento escolhido
+  // Salva o evento selecionado
   saveEvent();
-  
   statusEl.textContent = 'Verificando se já respondeu...';
 
   try {
+    // Verifica se o usuário já respondeu anteriormente
     const check = await fetch(`/api/has-responded?eventoID=${encodeURIComponent(eventoID)}&primaryId=${encodeURIComponent(fingerprint || uuid)}`);
     const cj = await check.json();
+
     if (check.ok && cj.responded) {
       form.classList.add('hidden');
       statusEl.textContent = 'Você já respondeu!';
       reiniciarBtn.classList.remove('hidden');
       return;
-    }else if (cj.responded === false){
-
-      console.log("Usuário ainda não respondeu, pode continuar. agora verificar com o UUID");
-      //verificar com o uuid
-
     }
   } catch (err) {
     console.warn('Não foi possível checar status (continuaremos):', err);
-    // opcional: aqui você pode impedir envio se checagem for crítica
   }
 
-
+  // Monta dados para envio
   const data = {
     primaryId: fingerprint || uuid,
     uuid: uuid + "_" + eventoID,
     fingerprint: fingerprint,
     ID: eventoID,
     evento: evento,
-    nome: document.getElementById('nome').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    curso: document.getElementById('curso').value.trim(),
-    periodo: document.getElementById('periodo').value.trim()
-    
+    nome,
+    email,
+    curso,
+    periodo
   };
 
-  console.log(data);
-  
+  // Envia formulário para o servidor
   try {
     const resp = await fetch('/api/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+
     const j = await resp.json();
 
     if (resp.ok) {
@@ -242,14 +244,17 @@ form.addEventListener('submit', async (e) => {
     } else {
       statusEl.textContent = 'Erro ao enviar: ' + (j.error || resp.status);
     }
+
   } catch (err) {
     console.error(err);
-    statusEl.textContent = 'Erro de comunicação com servidor.';
+    statusEl.textContent = 'Erro de comunicação com o servidor.';
   }
-
 });
 
-// --- Evento click do botão reiniciar ---
+// =========================================================
+//  REINÍCIO MANUAL (BOTÃO)
+// =========================================================
+
 reiniciarBtn.addEventListener('click', () => {
   resetarEstado();
   verificarLocalizacao();
