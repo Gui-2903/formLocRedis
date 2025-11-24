@@ -10,6 +10,7 @@ const reiniciarBtn = document.getElementById('reiniciar');
 
 // === Variáveis globais ===
 let evento;
+let forms;
 let eventoID;
 let targetLat;
 let targetLng;
@@ -139,6 +140,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     targetLng = redisConfigData.TARGET_LNG || 0;
     allowedRadius = redisConfigData.ALLOWED_RADIUS_METERS || 0;
     evento = redisConfigData.EVENTO || "Evento";
+    forms = redisConfigData.FORMS || "000";
     eventoID = redisConfigData.ID || 0;
     palestras = redisConfigData.PALESTRAS || "{}";
     localizacao = redisConfigData.LOCALIZACAO || "{}";
@@ -216,6 +218,7 @@ form.addEventListener('submit', async (e) => {
     fingerprint: fingerprint,
     ID: eventoID,
     evento: evento,
+    forms: forms,
     nome,
     email,
     curso,
@@ -229,6 +232,7 @@ form.addEventListener('submit', async (e) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+
 
     const j = await resp.json();
 

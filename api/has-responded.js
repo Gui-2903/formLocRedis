@@ -1,5 +1,4 @@
-// api/has-responded.js
-import crypto from 'crypto';
+
 /* se usar node-redis */
 import { redis } from '../lib/upstash.js';
 

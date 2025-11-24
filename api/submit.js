@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { primaryId, ID, fingerprint, uuid, nome, email, curso, periodo, evento } = req.body || {};
+    const { primaryId, ID, fingerprint, uuid, nome, email, curso, periodo, evento, forms } = req.body || {};
     if (!ID || !primaryId) return res.status(400).json({ error: 'Campos obrigatórios faltando' });
 
     // Chave baseada em fingerprint e evento
@@ -16,28 +16,89 @@ export default async function handler(req, res) {
     if (already) return res.status(409).json({ error: 'Já respondeu' });
 
     //const userData = await redis.get(uuid);
-
+    console.log('Dados recebidos em /api/submit:', forms );
 
     // --- Envia pro Google Forms (seu código, adaptado pra manter eventID se precisar) ---
-    const FORM_ID = process.env.FORM_ID;
-    const ENTRY_NOME = process.env.ENTRY_NOME;
-    const ENTRY_EMAIL = process.env.ENTRY_EMAIL;
-    const ENTRY_CURSO = process.env.ENTRY_CURSO;
-    const ENTRY_PERIODO = process.env.ENTRY_PERIODO;
-    const ENTRY_EVENTO = process.env.ENTRY_EVENTO;
 
-    if (!FORM_ID || !ENTRY_NOME || !ENTRY_EMAIL) {
-      return res.status(500).json({ error: 'Configuração do formulário faltando no servidor' });
+    // --- 2. CHAMAR A API /api/formsLink PARA OBTER OS ENTRIES ---
+    let entries;
+    try {
+      const baseUrl = process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}` 
+        : 'http://localhost:3000'; // Ajuste a porta se for diferente
+
+      const apiUrl = new URL('/api/formsLink', baseUrl);
+
+      const resp = await fetch(apiUrl.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // CORREÇÃO: Enviar um objeto JSON { forms: "..." }
+        body: JSON.stringify({ forms: forms }) 
+      });
+
+      if (!resp.ok) {
+        const errorText = await resp.text();
+        console.error('Erro ao chamar /api/formsLink:', resp.status, errorText);
+        return res.status(502).json({ error: 'Falha ao buscar entries do formulário', details: errorText });
+      }
+      
+      const data = await resp.json();
+      entries = data.entries; // Agora temos [{ entry: "entry.123", label: "Nome" }, ...]
+      console.log('[api/submit] Entries recebidos de /api/formsLink:', entries);
+
+    } catch (err) {
+      console.error('Erro ao chamar /api/formsLink internamente:', err);
+      return res.status(500).json({ error: 'Erro interno ao chamar API de forms', details: err.message });
     }
 
-    const params = new URLSearchParams();
-    params.append(ENTRY_NOME, nome);
-    params.append(ENTRY_EMAIL, email);
-    if (ENTRY_CURSO) params.append(ENTRY_CURSO, curso || '');
-    if (ENTRY_PERIODO) params.append(ENTRY_PERIODO, periodo || '');
-    if (evento) params.append(ENTRY_EVENTO, evento || '');
+    
 
-    const url = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
+    // --- 3. MAPEAMENTO DINÂMICO DOS DADOS PARA OS ENTRIES ---
+    // Mapeia os dados do usuário para os 'labels' (nomes das perguntas)
+    // que esperamos do Google Forms.
+    const userDataMap = {
+      'Nome Completo': nome,        
+      'Endereço de e-mail': email,      
+      'Qual seu curso?': curso,      
+      'Período ': periodo,
+      'Palestra de Abertura': evento
+    };
+
+    const params = new URLSearchParams();
+    
+    // Itera sobre os entries que recebemos da api/formsLink
+    entries.forEach(item => {
+      // item.label é "Nome", "Email", etc.
+      // item.entry é "entry.12345"
+      
+      // Verifica se temos um dado correspondente para esse label
+      if (userDataMap.hasOwnProperty(item.label)) {
+        const value = userDataMap[item.label];
+        if (value) { // Só adiciona se o valor não for nulo ou indefinido
+          params.append(item.entry, value);
+          console.log(`[api/submit] Mapeando: ${item.label} (${item.entry}) = ${value}`);
+        }
+      }
+    });
+
+    // ✅✅✅ ADICIONE ESTE NOVO LOG AQUI ✅✅✅
+console.log('----------------------------------------------------');
+console.log('[api/submit] DEBUG: userDataMap:', userDataMap);
+// ✅✅✅ FIM DO NOVO LOG ✅✅✅
+
+// Seu log de debug existente
+console.log('----------------------------------------------------');
+console.log('[api/submit] DEBUG: Dados que serão enviados ao Google:');
+
+    // ✅✅✅ ADICIONE ESTE DEBUG AQUI ✅✅✅
+console.log('----------------------------------------------------');
+console.log('[api/submit] DEBUG: Dados que serão enviados ao Google:');
+console.log('Form ID (forms):', forms);
+console.log('Entries (params):', params.toString());
+console.log('----------------------------------------------------');
+// ✅✅✅ FIM DO DEBUG ✅✅✅
+
+    const url = `https://docs.google.com/forms/d/e/${forms}/formResponse`;
     const r = await fetch(url, {
       method: 'POST',
       body: params.toString(),

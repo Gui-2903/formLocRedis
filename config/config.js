@@ -1,6 +1,7 @@
 
 //fallback TEM QUE BUSCAR NO REDIS 
 let fallback = null;
+let current = null; // objeto corrente
 
 //trocar end points
 const endpoints = {
@@ -25,8 +26,19 @@ const fileImport = document.getElementById('fileImport');
 const btnReset = document.getElementById('btnReset');
 const btnAtualizarTudo = document.getElementById('btnAtualizarTudo');
 const toggleMonitorEl = document.getElementById('toggleMonitor');
+const forms = document.getElementById('forms');
 
-let current = null; // objeto corrente
+const btnOpenMapPicker = document.getElementById('btnOpenMapPicker');
+const mapModalOverlay = document.getElementById('mapModalOverlay');
+const mapContainer = document.getElementById('mapContainer');
+const btnConfirmMapSelection = document.getElementById('btnConfirmMapSelection');
+const btnCloseMapModal = document.getElementById('btnCloseMapModal');
+
+// ✅ ADICIONE ESTAS VARIÁVEIS GLOBAIS PARA O MAPA ✅
+let mapInstance = null;
+let mapMarker = null;
+let tempCoords = { lat: 0, lng: 0 };
+
 
 // config/config.js
 document.addEventListener('DOMContentLoaded', async () => {
@@ -86,6 +98,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   loadFromServer();
+
+  // ✅ ADICIONE OS LISTENERS DO MAPA AQUI ✅
+  btnOpenMapPicker.addEventListener('click', openMapModal);
+  btnCloseMapModal.addEventListener('click', closeMapModal);
+  mapModalOverlay.addEventListener('click', (e) => {
+    // Fecha o modal se clicar fora da área de conteúdo
+    if (e.target === mapModalOverlay) {
+      closeMapModal();
+    }
+  });
+  btnConfirmMapSelection.addEventListener('click', confirmMapSelection);
  
 });
 
@@ -127,6 +150,7 @@ function renderUIFromCurrent() {
   if (!current && !fallback) current = {};
   allowedRadiusEl.value = current.ALLOWED_RADIUS_METERS ?? '';
   eventoEl.value = current.EVENTO ?? '';
+  forms.value = current.FORMS ?? '';
   targetLatEl.value = current.TARGET_LAT ?? '';
   targetLngEl.value = current.TARGET_LNG ?? '';
   toggleMonitorEl.checked = String(current.LOCALIZACAO) === "true";
@@ -225,6 +249,7 @@ document.getElementById('btnSave').addEventListener('click', async (ev) => {
   const payload = {
     ALLOWED_RADIUS_METERS: allowedRadius,
     EVENTO: evento,
+    FORMS: forms.value.trim() || "000",
     LOCALIZACAO: current.LOCALIZACAO || "---",
     PALESTRAS: current.PALESTRAS || {},
     TARGET_LAT: lat,
@@ -262,6 +287,7 @@ function updatePreview() {
     TARGET_LAT: Number(targetLatEl.value || current?.TARGET_LAT || 0),
     TARGET_LNG: Number(targetLngEl.value || current?.TARGET_LNG || 0),
     LOCALIZACAO: current.LOCALIZACAO || '',
+    FORMS: forms.value ||current?.FORMS || '000',
     EVENTO: eventoEl.value || current?.EVENTO || '',
     PALESTRAS: current?.PALESTRAS || {}
   };
@@ -273,9 +299,10 @@ function resetarEstado() {
   renderUIFromCurrent();
 }
 
-[allowedRadiusEl, eventoEl, targetLatEl, targetLngEl].forEach(el => {
+[allowedRadiusEl, eventoEl, targetLatEl, targetLngEl, forms].forEach(el => {
   el.addEventListener('input', updatePreview);
 });
+
 
 // ======== MONITORAMENTO DE ALTERAÇÕES EM TEMPO REAL ========
 // === COMPARADOR DETALHADO DE OBJETOS ===
@@ -328,6 +355,7 @@ function highlightChangedFields(differences) {
     else if (path === 'EVENTO') eventoEl.classList.add('field-changed');
     else if (path === 'TARGET_LAT') targetLatEl.classList.add('field-changed');
     else if (path === 'TARGET_LNG') targetLngEl.classList.add('field-changed');
+    else if (path === 'FORMS') forms.classList.add('field-changed');
 
     // Campos de palestras
 
@@ -401,7 +429,6 @@ function configurarMonitoramento(elementoAlvo) {
 
   }
 }
-
 // Chame a função para configurar o monitoramento em todo o corpo do documento
 configurarMonitoramento(document.body);
 
@@ -497,5 +524,68 @@ toggleMonitorEl.addEventListener('change', () => {
   }
 
   });
+
+  // ✅ ADICIONE ESTA FUNÇÃO PARA ABRIR O MODAL ✅
+function openMapModal() {
+  // Pega os valores atuais dos inputs (ou usa um padrão se estiverem vazios)
+  let currentLat = parseFloat(targetLatEl.value) || -20.678; // Default (ex: Carangola, MG)
+  let currentLng = parseFloat(targetLngEl.value) || -42.029; // Default (ex: Carangola, MG)
+  
+  tempCoords = { lat: currentLat, lng: currentLng };
+  mapModalOverlay.classList.add('visible');
+
+  if (!mapInstance) {
+    // Inicializa o mapa (APENAS NA PRIMEIRA VEZ)
+    mapInstance = L.map(mapContainer).setView([currentLat, currentLng], 15);
+    
+    // Adiciona a camada de mapa (usando OpenStreetMap, que é gratuito)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mapInstance);
+
+    // Adiciona o marcador inicial
+    mapMarker = L.marker([currentLat, currentLng], { draggable: true }).addTo(mapInstance);
+
+    // Evento de clique no mapa
+    mapInstance.on('click', (e) => {
+      tempCoords = e.latlng;
+      mapMarker.setLatLng(tempCoords);
+    });
+
+    // Evento de arrastar o marcador
+    mapMarker.on('dragend', () => {
+      tempCoords = mapMarker.getLatLng();
+    });
+
+  } else {
+    // Se o mapa já existe, apenas atualiza a visão e o marcador
+    mapInstance.setView([currentLat, currentLng], 15);
+    mapMarker.setLatLng([currentLat, currentLng]);
+    
+    // IMPORTANTE: Invalida o tamanho para corrigir renderização no modal
+    setTimeout(() => {
+      mapInstance.invalidateSize();
+    }, 100);
+  }
+}
+
+// ✅ ADICIONE ESTA FUNÇÃO PARA FECHAR O MODAL ✅
+function closeMapModal() {
+  mapModalOverlay.classList.remove('visible');
+}
+
+// ✅ ADICIONE ESTA FUNÇÃO PARA CONFIRMAR A SELEÇÃO ✅
+function confirmMapSelection() {
+  // Atualiza os campos de input com as coordenadas selecionadas
+  targetLatEl.value = tempCoords.lat.toFixed(7); // 7 casas decimais é uma boa precisão
+  targetLngEl.value = tempCoords.lng.toFixed(7);
+
+  // IMPORTANTE: Dispara o evento "input" para que sua função updatePreview()
+  // e o debouncedCompare() sejam acionados automaticamente!
+  targetLatEl.dispatchEvent(new Event('input', { bubbles: true }));
+  targetLngEl.dispatchEvent(new Event('input', { bubbles: true }));
+
+  closeMapModal();
+}
 
 loadFromServer();

@@ -376,3 +376,63 @@ input:checked + .slider:before {
     font-size: 0.95rem;
   }
 }
+
+/* ======== ESTILOS DO MODAL DE MAPA ======== */
+.map-modal-overlay {
+  display: none; /* Começa escondido */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+/* Classe para mostrar o modal via JS */
+.map-modal-overlay.visible {
+  display: flex;
+}
+
+.map-modal-content {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.map-modal-content h3 {
+  font-size: 1.4rem;
+  margin-top: 0;
+  margin-bottom: 0.2rem;
+}
+
+/* Onde o mapa do Leaflet vai ser renderizado */
+#mapContainer {
+  height: 400px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-top: 0.5rem;
+  background: #f0f0f0; /* Cor de fundo enquanto o mapa carrega */
+}
+
+.map-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* Garante que o CSS do Leaflet funcione bem */
+.leaflet-container {
+  z-index: 1; 
+}
