@@ -1,7 +1,11 @@
+/* ======== LAYOUT PRINCIPAL ======== */
 main {
   display: flex;
   justify-content: center;
+  align-items: center;        /* << Centraliza verticalmente */
+  min-height: 100vh;          /* << Ocupa a altura total da tela */
   padding: 1rem;
+  box-sizing: border-box;
 }
 
 .card {
@@ -14,10 +18,12 @@ main {
   transition: all 0.3s ease;
 }
 
+/* ======== TIPOGRAFIA ======== */
 h1 {
   font-size: 1.6rem;
   margin-bottom: 0.3rem;
 }
+
 p{
   margin-bottom: 6px;
   font-size: 0.95rem;
@@ -32,6 +38,7 @@ p{
   margin-bottom: 1.2rem;
 }
 
+/* ======== GRID ======== */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -49,6 +56,7 @@ label {
   font-weight: 600;
   gap: 0.3rem;
 }
+
 .AddPalestra{
   display: flex;
   flex-direction: column;
@@ -56,6 +64,7 @@ label {
   gap: 0.3rem;
 }
 
+/* ======== INPUTS ======== */
 input {
   padding: 0.7rem 0.9rem;
   border: 1px solid #ccc;
@@ -86,7 +95,6 @@ input:focus {
   background: #eef3ff;
   color: #0a3d91;
 }
-
 .smallBtn:hover {
   background: #dbe4ff;
 }
@@ -98,7 +106,6 @@ input:focus {
   margin-left: auto;
   margin-bottom: 1rem;
 }
-
 .atualizarBtn:hover {
   background: #d0e7ff;
 }
@@ -107,35 +114,19 @@ input:focus {
   background: #007bff;
   color: white;
 }
-
 .button:hover {
   background: #0069d9;
 }
 
-
+/* ======== STATUS ======== */
 #statusMsg{
   font-weight: 600;
-  /* margin-top: 0.5rem; */ /* Removido para alinhar melhor com os botões */
-  
-  /* --- NOVAS REGRAS PARA ESTABILIZAR A ALTURA --- */
-  
-  /* 1. Define uma altura mínima estável (suficiente para ~2 linhas) */
   min-height: 2.8em; 
-  
-  /* 2. Adiciona um preenchimento para a mensagem não colar nas bordas */
-  /*padding: 0.5rem 2.8rem;
-  
-  /* 3. Garante que o padding não "aumente" a altura total */
   box-sizing: border-box;
-
-  /* 4. Truque para centralizar o texto verticalmente se houver só 1 linha */
   display: flex;
   align-items: center;
-  
-  /* 5. Garante que ele possa crescer se a mensagem for muito longa (ex: mobile) */
   flex: 1; 
 }
-
 
 .success {
   padding: 0.5rem 2.999rem;
@@ -191,7 +182,7 @@ input:focus {
   border-radius: 10px;
 }
 
-/* ======== DEMAIS ELEMENTOS ======== */
+/* ======== OUTROS ELEMENTOS ======== */
 .muted {
   color: #666;
   font-size: 0.9rem;
@@ -221,14 +212,12 @@ pre.json-preview {
   margin-bottom: 1.2rem;
 }
 
-/* ======== ESTILOS DO NOVO TOGGLE SWITCH ======== */
-
-/* Contêiner para alinhar o rótulo e o interruptor */
+/* ======== TOGGLE ======== */
 .toggle-container {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: auto; /* Alinha à direita dentro do top-actions */
+  margin-left: auto;
   padding: 0.5rem;
 }
 
@@ -236,30 +225,21 @@ pre.json-preview {
   font-weight: 600;
   font-size: 0.9rem;
   color: #374363;
-  /* Reset de estilos de 'label' anterior */
-  flex-direction: row; 
-  gap: 0.5rem;
 }
 
-/* O contêiner principal do interruptor */
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 50px; /* Largura do interruptor */
-  height: 28px; /* Altura do interruptor */
-  /* Reset de estilos de 'label' anterior */
-  flex-direction: row;
-  gap: 0;
+  width: 50px;
+  height: 28px;
 }
 
-/* Esconde o checkbox real */
 .toggle-switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-/* O 'trilho' do interruptor */
 .slider {
   position: absolute;
   cursor: pointer;
@@ -268,35 +248,28 @@ pre.json-preview {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  -webkit-transition: .4s;
   transition: .4s;
 }
 
-/* O 'botão' deslizante */
 .slider:before {
   position: absolute;
   content: "";
-  height: 20px; /* Tamanho do botão */
-  width: 20px;  /* Tamanho do botão */
+  height: 20px;
+  width: 20px;
   left: 4px;
   bottom: 4px;
   background-color: white;
-  -webkit-transition: .4s;
   transition: .4s;
 }
 
-/* Cor e movimento quando ATIVADO (checked) */
 input:checked + .slider {
-  background-color: #007bff; /* Cor azul (mesma do botão Salvar) */
+  background-color: #007bff;
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(22px);
-  -ms-transform: translateX(22px);
-  transform: translateX(22px); /* Distância do movimento */
+  transform: translateX(22px);
 }
 
-/* Formato arredondado */
 .slider.round {
   border-radius: 34px;
 }
@@ -304,23 +277,35 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+/* --- Novo CSS para o input 'FORMS' --- */
+#forms {
+  max-width: 768px;
+  width: 100%; 
+  word-break: break-all;
+  /* (Alternativa/Complementar, dependendo do navegador) */
+  overflow-wrap: break-word;
+}
 
-/* ======== RESPONSIVO (CELULAR) ======== */
+
+/* ======== RESPONSIVIDADE ======== */
 @media (max-width: 768px) {
+
   main {
-    padding: 0;
+    align-items: flex-start;   /* Evita centralizar demais no mobile */
+    padding: 0.5rem;
+    min-height: auto;
   }
 
   .danger{
     margin-left: auto;
+    padding: 0.5rem 2.1099rem;
   }
 
   .card {
-    border-radius: 0;
-    box-shadow: none;
     max-width: 100%;
     padding: 1rem;
-    border-radius: 20px;
+    border-radius: 16px;
+    box-shadow: none;
   }
 
   .grid {
@@ -359,8 +344,8 @@ input:checked + .slider:before {
 
   pre.json-preview {
     max-height: none;
+    max-width: 360px;
     white-space: pre-wrap;
-    word-wrap: break-word;
   }
 
   input {
@@ -375,11 +360,52 @@ input:checked + .slider:before {
   .muted {
     font-size: 0.95rem;
   }
+  #forms {
+   width: 100%; 
+    
+    /* Garanta que ele não force o crescimento do CARD */
+    /* A regra de 80% é a que pode estar causando a inconsistência */
+    max-width: 100%;
+  }
 }
 
-/* ======== ESTILOS DO MODAL DE MAPA ======== */
+@media (max-width: 400px) {
+        input {
+        font-size: 1rem;
+        min-height: 41px;
+        max-width: 85%;
+    }
+        .card {
+        max-width: 100%;
+    }
+    .smallBtn, .atualizarBtn, .buttonSubmit {
+        width: 60%;
+    }
+    .palestra-item {
+        
+        max-width: 90%;
+    }
+    .success {
+    padding: 0.5rem 0.999rem;
+    }
+    .danger {
+    padding: 0.5rem 0.199rem;
+    }
+    #forms {
+    max-width: 80%; /* No mobile, ele deve usar 100% da largur*/
+    }
+     pre.json-preview {
+    max-height: none;
+    max-width: 260px;
+    white-space: pre-wrap;
+  }
+    
+
+}
+
+/* ======== MODAL MAPA ======== */
 .map-modal-overlay {
-  display: none; /* Começa escondido */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -392,7 +418,6 @@ input:checked + .slider:before {
   padding: 1rem;
 }
 
-/* Classe para mostrar o modal via JS */
 .map-modal-overlay.visible {
   display: flex;
 }
@@ -415,14 +440,13 @@ input:checked + .slider:before {
   margin-bottom: 0.2rem;
 }
 
-/* Onde o mapa do Leaflet vai ser renderizado */
 #mapContainer {
   height: 400px;
   width: 100%;
   border-radius: 10px;
   border: 1px solid #ccc;
   margin-top: 0.5rem;
-  background: #f0f0f0; /* Cor de fundo enquanto o mapa carrega */
+  background: #f0f0f0;
 }
 
 .map-modal-actions {
@@ -432,7 +456,6 @@ input:checked + .slider:before {
   margin-top: 1rem;
 }
 
-/* Garante que o CSS do Leaflet funcione bem */
 .leaflet-container {
   z-index: 1; 
 }
