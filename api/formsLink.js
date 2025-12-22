@@ -12,7 +12,14 @@ async function getEntries(formId) {
   }
 
   const FORM_URL = `https://docs.google.com/forms/d/e/${formId}/viewform`;
-  const html = await fetch(FORM_URL).then(res => res.text());
+  const html = await fetch(FORM_URL, {
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+        '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
+    }
+  }).then(res => res.text());
   
   // A variável que contém o JSON com todos os campos
   const match = html.match(/FB_PUBLIC_LOAD_DATA_ = (.*?);<\/script>/);
