@@ -56,34 +56,37 @@ export default async function handler(req, res) {
     // --- 3. MAPEAMENTO DINÂMICO DOS DADOS PARA OS ENTRIES ---
     // Mapeia os dados do usuário para os 'labels' (nomes das perguntas)
     // que esperamos do Google Forms.
-    const userDataMap = {
-      'Nome Completo': nome,        
-      'Endereço de e-mail': email,      
-      'Qual seu curso?': curso,      
-      'Período ': periodo,
-      'Palestra de Abertura': evento
-    };
 
     const params = new URLSearchParams();
     
-    // Itera sobre os entries que recebemos da api/formsLink
+   const normalize = s => s
+    .toLowerCase()
+    .replace(/[:?]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+    const normalizedUserMap = {
+      'nome completo': nome,
+      'e-mail institucional ou pessoal': email,
+      'curso': curso,
+      'qual período': periodo,
+      'evento': evento
+    };
+    
     entries.forEach(item => {
-      // item.label é "Nome", "Email", etc.
-      // item.entry é "entry.12345"
-      
-      // Verifica se temos um dado correspondente para esse label
-      if (userDataMap.hasOwnProperty(item.label)) {
-        const value = userDataMap[item.label];
-        if (value) { // Só adiciona se o valor não for nulo ou indefinido
-          params.append(item.entry, value);
-          console.log(`[api/submit] Mapeando: ${item.label} (${item.entry}) = ${value}`);
-        }
+      const key = normalize(item.label);
+      if (normalizedUserMap[key]) {
+        params.append(item.entry, normalizedUserMap[key]);
+        console.log(`[api/submit] Mapeando: ${item.label} (${item.entry}) = ${normalizedUserMap[key]}`);
       }
     });
 
+
+    
+
     // ✅✅✅ ADICIONE ESTE NOVO LOG AQUI ✅✅✅
 console.log('----------------------------------------------------');
-console.log('[api/submit] DEBUG: userDataMap:', userDataMap);
+//console.log('[api/submit] DEBUG: userDataMap:', userDataMap);
 // ✅✅✅ FIM DO NOVO LOG ✅✅✅
 
 // Seu log de debug existente
