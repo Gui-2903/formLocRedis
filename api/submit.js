@@ -23,32 +23,24 @@ export default async function handler(req, res) {
     // --- 2. CHAMAR A API /api/formsLink PARA OBTER OS ENTRIES ---
     let entries;
     try {
-      const baseUrl = process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}` 
-        : 'http://localhost:3000'; // Ajuste a porta se for diferente
+     
+      const cached = await redis.json.get('forms');
+      console.log('[api/submit] Cached entries from redis for forms:', forms, cached);
 
-      const apiUrl = new URL('/api/formsLink', baseUrl);
-
-      const resp = await fetch(apiUrl.toString(), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // CORREÇÃO: Enviar um objeto JSON { forms: "..." }
-        body: JSON.stringify({ forms: forms }) 
-      });
-
-      if (!resp.ok) {
-        const errorText = await resp.text();
-        console.error('Erro ao chamar /api/formsLink:', resp.status, errorText);
-        return res.status(502).json({ error: 'Falha ao buscar entries do formulário', details: errorText });
+      if (!cached) {
+        return res.status(500).json({
+          error: 'Formulário não configurado no sistema'
+        });
       }
-      
-      const data = await resp.json();
-      entries = data.entries; // Agora temos [{ entry: "entry.123", label: "Nome" }, ...]
-      console.log('[api/submit] Entries recebidos de /api/formsLink:', entries);
+
+      entries = cached.entries;
+      //JSON.parse(cached);
+
+      console.log('[api/submit] Entries recebidos de redis:', entries);
 
     } catch (err) {
-      console.error('Erro ao chamar /api/formsLink internamente:', err);
-      return res.status(500).json({ error: 'Erro interno ao chamar API de forms', details: err.message });
+      console.error('Erro ao chamar redis para obter entries', err);
+      return res.status(500).json({ error: 'Erro ao processar formulário pegando entries', details: err.message });
     }
 
     
